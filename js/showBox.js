@@ -45,7 +45,7 @@ Showbox.Msg={
           +'filter=\'progid:DXImageTransform.Microsoft.Alpha(style=0,opacity=0)\';"></iframe>',  
       html='<div class="top"><div class="contain"><h2 class="title" id="dvMsgTitle"></h2></div></div>'+  
         '<div class="body"><div class="contain"><div class="ct" id="dvMsgCT"></div></div></div>'+  
-        '<div class="bottom" id="dvMsgBottom"><div class="contain"><div class="btn" id="dvMsgBtns"></div></div></div>';  
+        '<div class="bottom" id="dvMsgBottom"><div class="contain"><div class="callbtn" id="dvMsgBtns"></div></div></div>';  
       this.dvMsgBox=document.createElement("div");  
       this.dvMsgBox.id="dvMsgBox";  
       this.dvMsgBox.innerHTML+=html;        
@@ -74,8 +74,6 @@ Showbox.Msg={
         btn.type="button";  
         btn.className='showboxbtn';  
         btn.value=v;  
-        btn.onmouseover=function(){this.className='showboxbtnfocus';}  
-        btn.onmouseout=function(){this.className='showboxbtn';}  
         btn.onclick=function(){  
           Showbox.Msg.hide();  
           if(fn)fn(p);  
@@ -85,9 +83,9 @@ Showbox.Msg={
     alert:function(msg){  
       this.show({buttons:{yes:'确认'},msg:msg,title:'消息'});  
     },  
-    confirm:function(msg,fn){  
+    confirm:function(msg,title,fn){  
       //fn为回调函数，参数和show方法的一致  
-      this.show({buttons:{yes:'确认',no:'取消'},msg:msg,title:'提示',fn:fn});  
+      this.show({buttons:{yes:'确认',no:'取消'},msg:msg,title:title,fn:fn});  
     },  
     prompt:function(labelWord,defaultValue,txtId,fn){  
       if(!labelWord)labelWord='请输入：';  
@@ -116,7 +114,8 @@ Showbox.Msg={
       //可以直接使用show方法停止为进度条的窗口  
       if(this.timer){clearInterval(this.timer);this.timer=null;}        
       this.dvTitle.innerHTML='';  
-      if(cfg.title)this.dvTitle.innerHTML=cfg.title;  
+      if(cfg.title)this.dvTitle.innerHTML=cfg.title;
+      else this.dvTitle.innerHTML="提示"
       this.dvCT.innerHTML='';  
       if(cfg.wait){  
         if(cfg.msg)this.dvCT.innerHTML=cfg.msg;  
@@ -138,7 +137,7 @@ Showbox.Msg={
           this.dvBtns.appendChild(this.createBtn('yes',cfg.buttons.yes,cfg.fn));  
           if(cfg.buttons.no)this.dvBtns.appendChild(document.createTextNode('　'));  
         }  
-        if(cfg.buttons.no)this.dvBtns.appendChild(this.createBtn('no',cfg.buttons.no,cfg.fn));  
+        if(cfg.buttons.no)this.dvBtns.appendChild(this.createBtn('no',cfg.buttons.no));  
       }  
       Showbox.initBodyScale();  
       this.dvMsgBox.style.display='block';  
@@ -156,7 +155,8 @@ Showbox.Msg={
        if(isResize)Showbox.initBodyScale();  
        Showbox.Msg.lightBox.style.width=Showbox.BodyScale.tx+'px';  
        Showbox.Msg.lightBox.style.height=Showbox.BodyScale.ty+'px';  
-       Showbox.Msg.dvMsgBox.style.top=240+'px';  
+       Showbox.Msg.dvMsgBox.style.top=35+'%';  
        Showbox.Msg.dvMsgBox.style.left=Math.floor((Showbox.BodyScale.x-Showbox.Msg.dvMsgBox.offsetWidth)/2)+'px';  
+       Showbox.Msg.dvMsgBox.style.position='fixed';  
     }  
 }  
