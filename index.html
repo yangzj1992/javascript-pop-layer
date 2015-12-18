@@ -2,17 +2,29 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>js alert confirm样式弹出框</title>
+<title>simple-js-dialogbox</title>
 <link type="text/css" rel="stylesheet" href="css/showBox.css" />
 <script type="text/javascript" src="js/showBox.js"></script>
 </head>
 <body >
 <div id="wrap">
 	<div class="box">
-		<input type="button" value="Showbox.Msg.alert" onclick="Showbox.Msg.alert('您好，请先注册或登录!')">
-		<input type="button" value="Showbox.Msg.confirm" onclick="Showbox.Msg.confirm('您确定删除这条记录吗？')">
+		<input type="button" class="alert" id="alertbtn" value="Showbox.Msg.alert">
+		<input type="button" class="confirm" id="confirmbtn" value="Showbox.Msg.confirm">
 	</div>
 </div>
 </div>
+<script type="text/javascript">
+  document.getElementById('alertbtn').onclick=function(){
+    Showbox.Msg.alert({
+      content:'您好，请先注册或登录!'
+    });
+  }
+  document.getElementById('confirmbtn').onclick=function(){
+    Showbox.Msg.confirm({
+      content:'您确定删除这条记录吗？'
+    });
+  }
+</script>
 </body>
 </html>

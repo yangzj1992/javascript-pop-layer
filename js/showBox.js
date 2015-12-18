@@ -39,11 +39,11 @@ Showbox.Msg={
       }  
       o.style.width=w+'%';  
     },  
-    InitMsg:function(width){  
+    InitMsg:function(cfg){  
       //ie下不按照添加事件的循序来执行，所以要注意在调用alert等方法时要检测是否已经初始化IsInit=true       
       var ifStr='<iframe src="javascript:false" mce_src="javascript:false" style="position:absolute; visibility:inherit; top:0px;left:0px;width:100%; height:100%; z-index:-1;'  
           +'filter=\'progid:DXImageTransform.Microsoft.Alpha(style=0,opacity=0)\';"></iframe>',  
-      html='<div class="top"><div class="contain"><h2 class="title" id="dvMsgTitle"></h2></div></div>'+  
+      html='<div class="top" id="dvMsgTop"><div class="contain"><h2 class="title" id="dvMsgTitle"></h2></div></div>'+  
         '<div class="body"><div class="contain"><div class="ct" id="dvMsgCT"></div></div></div>'+  
         '<div class="bottom" id="dvMsgBottom"><div class="contain"><div class="callbtn" id="dvMsgBtns"></div></div></div>';  
       this.dvMsgBox=document.createElement("div");  
@@ -61,6 +61,9 @@ Showbox.Msg={
       this.dvBtns=Showbox.$('dvMsgBtns');  
       this.dvCT=Showbox.$('dvMsgCT');  
       this.dvTitle=Showbox.$('dvMsgTitle');  
+      if(!cfg.title){
+        document.getElementById("dvMsgTop").style.display="none";
+      }
       this.IsInit=true;  
     },  
     checkDOMLast:function(){//此方法非常关键，要不无法显示弹出窗口。两个对象dvMsgBox和lightBox必须处在body的最后两个节点内  
@@ -80,12 +83,12 @@ Showbox.Msg={
         }  
         return btn;  
     },  
-    alert:function(msg){  
-      this.show({buttons:{yes:'确认'},msg:msg,title:'消息'});  
+    alert:function(param){  
+      this.show({buttons:{yes:'确认'},msg:param.content,title:param.title});  
     },  
-    confirm:function(msg,title,fn){  
+    confirm:function(param){  
       //fn为回调函数，参数和show方法的一致  
-      this.show({buttons:{yes:'确认',no:'取消'},msg:msg,title:title,fn:fn});  
+      this.show({buttons:{yes:'确认',no:'取消'},msg:param.content,title:param.title,fn:param.fn});  
     },  
     prompt:function(labelWord,defaultValue,txtId,fn){  
       if(!labelWord)labelWord='请输入：';  
@@ -105,7 +108,7 @@ Showbox.Msg={
       if(Showbox.IsIE)window.attachEvent("onresize",this.onResize);  
       else  window.addEventListener("resize",this.onResize,false);  
         
-      if(!this.IsInit)this.InitMsg();//初始化dom对象  
+      if(!this.IsInit)this.InitMsg(cfg);//初始化dom对象  
       else this.checkDOMLast();//检查是否在最后  
         
       //检查是否要指定宽，默认为300  
