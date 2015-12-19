@@ -83,22 +83,22 @@ Showbox.Msg={
         }  
         return btn;  
     },  
-    alert:function(param){  
-      this.show({buttons:{yes:'确认'},msg:param.content,title:param.title});  
+    alert:function(param){ 
+      this.show({buttons:{yes:param.buttontext},msg:param.content,title:param.title,alert:true});  
     },  
     confirm:function(param){  
       //fn为回调函数，参数和show方法的一致  
-      this.show({buttons:{yes:'确认',no:'取消'},msg:param.content,title:param.title,fn:param.fn});  
+      this.show({buttons:{yes:'确认',no:'取消'},msg:param.content,title:param.title,fn:param.fn,confirm:true});  
     },  
-    prompt:function(labelWord,defaultValue,txtId,fn){  
-      if(!labelWord)labelWord='请输入：';  
-      if(!defaultValue)defaultValue="";  
-      if(!txtId)txtId="msg_txtInput";  
-      this.show({title:'输入提示',msg:labelWord+'<input type="text" id="'+txtId+'" style="width:200px" value="'+defaultValue+'"/>',buttons:{yes:'确认',no:'取消'},fn:fn});  
+    prompt:function(param){  
+      if(!param.labelWord)param.labelWord='请输入：';  
+      if(!param.defaultValue)param.defaultValue="";  
+      if(!param.txtId)param.txtId="msg_txtInput";  
+      this.show({title:'输入提示',msg:param.labelWord+'<input type="text" id="'+param.txtId+'" style="width:200px" value="'+param.defaultValue+'"/>',buttons:{yes:'确认',no:'取消'},fn:param.fn,prompt:true});  
     },  
-    wait:function(msg,title){  
-      if(!msg)msg='正在处理..';  
-      this.show({title:title,msg:msg,wait:true});  
+    wait:function(param){  
+      if(!param.msg)param.msg='正在处理..';  
+      this.show({title:param.title,msg:param.msg,wait:true});  
     },  
     show:function(cfg){  
       //cfg:{title:'',msg:'',wait:true,icon:'默认为信息',buttons:{yes:'',no:''},fn:function(btn){回调函数,btn为点击的按钮，可以为yes，no},width:显示层的宽}  
@@ -138,9 +138,9 @@ Showbox.Msg={
         this.dvBtns.innerHTML='<div class="height"></div>';  
         if(cfg.buttons.yes){  
           this.dvBtns.appendChild(this.createBtn('yes',cfg.buttons.yes,cfg.fn));  
-          if(cfg.buttons.no)this.dvBtns.appendChild(document.createTextNode('　'));  
+          if(cfg.buttons.no)this.dvBtns.appendChild(document.createTextNode(' '));
         }  
-        if(cfg.buttons.no)this.dvBtns.appendChild(this.createBtn('no',cfg.buttons.no));  
+        if(cfg.buttons.no)this.dvBtns.appendChild(this.createBtn('no',cfg.buttons.no)); 
       }  
       Showbox.initBodyScale();  
       this.dvMsgBox.style.display='block';  
