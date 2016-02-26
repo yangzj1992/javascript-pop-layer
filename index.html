@@ -9,23 +9,43 @@
 <body >
 <div id="wrap">
 	<div class="box">
-		<input type="button" class="alert" id="alertbtn" value="Showbox.Msg.alert">
-		<input type="button" class="confirm" id="confirmbtn" value="Showbox.Msg.confirm">
+		<input type="button" class="alert" id="alertbtn" value="alertbox">
+    <input type="button" class="operate" id="confirmbtn" value="confirmbox">
 	</div>
 </div>
 </div>
 <script type="text/javascript">
   document.getElementById('alertbtn').onclick=function(){
     Showbox.Msg.alert({
-      content:'您好，请先注册或登录!'
+      content:"明天不上班",
+      title:'提示',
+      text:'知道了',
+      width:'95%'
     });
   }
   document.getElementById('confirmbtn').onclick=function(){
-    Showbox.Msg.confirm({
-      content:'您确定删除这条记录吗？',
-      title:'提示'
-    });
+    var content = "<div style='text-align:center;font-size:18px;color:#5d5d5d;line-height:62px;'>提示</div>";
+    var buttons = [
+      {
+        val:"没看见",
+        args:[],
+        fn:function(){
+          Showbox.Msg.hide();
+        },
+        type:false
+      },
+      {
+        val:"好的",
+        args:[],
+        fn:function(){
+          alert("")
+        },
+        type:true
+      }
+    ];
+    Showbox.Msg.operate(content,'提示',buttons,'92%');
   }
+  
 </script>
 </body>
 </html>

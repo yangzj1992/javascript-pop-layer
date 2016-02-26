@@ -29,7 +29,7 @@ Showbox.Msg={
     dvBtns:null,  
     lightBox:null,  
     dvMsgBox:null,  
-    defaultWidth:300,  
+    defaultWidth:'300',  
     moveProcessbar:function(){  
       var o=Showbox.$('dvProcessbar'),w=o.style.width;  
       if(w=='')w=20;  
@@ -61,8 +61,17 @@ Showbox.Msg={
       this.dvBtns=Showbox.$('dvMsgBtns');  
       this.dvCT=Showbox.$('dvMsgCT');  
       this.dvTitle=Showbox.$('dvMsgTitle');  
-      if(!cfg.title){
-        document.getElementById("dvMsgTop").style.display="none";
+      if(cfg.title){
+        var closebtn = document.createElement("img");
+        closebtn.src = "image/cancel-icon.png";
+        closebtn.alt = "X";
+        closebtn.className = 'close';
+        closebtn.onclick=function(){  
+            Showbox.Msg.hide();   
+          }  
+        Showbox.$('dvMsgTop').appendChild(closebtn);
+      }else{
+        Showbox.$("dvMsgTop").style.display = "none";
       }
       this.IsInit=true;  
     },  
@@ -71,35 +80,52 @@ Showbox.Msg={
         document.body.appendChild(this.dvMsgBox);  
         document.body.appendChild(this.lightBox);  
       }  
-    },  
-    createBtn:function(p,v,fn){  
+    }, 
+    createDiv:function(w){  
+        var div=document.createElement("div");    
+        div.style.width = w + "%";  
+        div.style.display = "inline-block";
+        return div;  
+    },
+    createBtn:function(cfg,p,v,cname,fn){  
+        if (Object.prototype.toString.call(p)!=='[object Array]') {
+            var temparray = new Array(p);
+            p = temparray;
+        }
+   
         var btn=document.createElement("input");  
         btn.type="button";  
-        btn.className='showboxbtn';  
+        btn.className=cname;  
         btn.value=v;  
+        if(cfg.alert){
+            btn.style.width='100%';
+        }
         btn.onclick=function(){  
           Showbox.Msg.hide();  
-          if(fn)fn(p);  
+          if(fn)fn.apply(this,p);  
         }  
         return btn;  
     },  
-    alert:function(param){ 
-      this.show({buttons:{yes:param.buttontext},msg:param.content,title:param.title,alert:true});  
+    alert:function(param){  
+      this.show({buttons:{yes:param.text},msg:param.content,title:param.title,alert:true,width:param.width});  
     },  
     confirm:function(param){  
       //fn为回调函数，参数和show方法的一致  
-      this.show({buttons:{yes:'确认',no:'取消'},msg:param.content,title:param.title,fn:param.fn,confirm:true});  
+      this.show({buttons:{yes:param.msg_yes,no:param.msg_no},msg:param.msg,title:param.title,fn:param.fn,width:param.width});  
     },  
-    prompt:function(param){  
-      if(!param.labelWord)param.labelWord='请输入：';  
-      if(!param.defaultValue)param.defaultValue="";  
-      if(!param.txtId)param.txtId="msg_txtInput";  
-      this.show({title:'输入提示',msg:param.labelWord+'<input type="text" id="'+param.txtId+'" style="width:200px" value="'+param.defaultValue+'"/>',buttons:{yes:'确认',no:'取消'},fn:param.fn,prompt:true});  
+    prompt:function(labelWord,defaultValue,txtId,fn){  
+      if(!labelWord)labelWord='请输入：';  
+      if(!defaultValue)defaultValue="";  
+      if(!txtId)txtId="msg_txtInput";  
+      this.show({title:'输入提示',msg:labelWord+'<input class="msg_txtInput" type="text" id="'+txtId+'" value="'+defaultValue+'"/>',buttons:{yes:'确认',no:'取消'},fn:fn});  
     },  
-    wait:function(param){  
-      if(!param.msg)param.msg='正在处理..';  
-      this.show({title:param.title,msg:param.msg,wait:true});  
-    },  
+    wait:function(msg,title){  
+      if(!msg)msg='正在处理..';  
+      this.show({title:title,msg:msg,wait:true});  
+    },
+    operate:function(msg,title,buttons,width){
+        this.show({buttons:buttons,msg:msg,title:title,width:width,operate:true});
+    }, 
     show:function(cfg){  
       //cfg:{title:'',msg:'',wait:true,icon:'默认为信息',buttons:{yes:'',no:''},fn:function(btn){回调函数,btn为点击的按钮，可以为yes，no},width:显示层的宽}  
       //如果是等待则wait后面的配置不需要了。。   
@@ -112,35 +138,80 @@ Showbox.Msg={
       else this.checkDOMLast();//检查是否在最后  
         
       //检查是否要指定宽，默认为300  
-      if(cfg.width)this.defaultWidth=cfg.width;  
-      this.dvMsgBox.style.width=this.defaultWidth+'px';  
+      if(cfg.width)this.defaultWidth=cfg.width;
+      if(this.defaultWidth.substr(-1) == '%'){
+        this.dvMsgBox.style.width=this.defaultWidth;  
+      }else{
+        this.dvMsgBox.style.width=this.defaultWidth+'px';  
+      }
       //可以直接使用show方法停止为进度条的窗口  
       if(this.timer){clearInterval(this.timer);this.timer=null;}        
       this.dvTitle.innerHTML='';  
-      if(cfg.title)this.dvTitle.innerHTML=cfg.title;
-      else this.dvTitle.innerHTML="提示"
+      if(cfg.title)this.dvTitle.innerHTML=cfg.title;  
       this.dvCT.innerHTML='';  
+      this.dvBtns.innerHTML='';
       if(cfg.wait){  
         if(cfg.msg)this.dvCT.innerHTML=cfg.msg;  
         this.dvCT.innerHTML+='<div class="pro"><div class="bg" id="dvProcessbar"></div></div>';  
         this.dvBtns.innerHTML='';  
         this.dvBottom.style.height='10px';  
         this.timer=setInterval(function(){Showbox.Msg.moveProcessbar();},1000);  
-      }  
-      else{  
-        //if(!cfg.icon)cfg.icon=Showbox.Msg.INFO;  
-        if(!cfg.buttons||(!cfg.buttons.yes&&!cfg.buttons.no)){  
-          cfg.buttons={yes:'确定'};  
-        }  
+      }
+      else if (cfg.operate) {
+        if(!cfg.buttons||cfg.buttons.length<1){  
+          cfg.buttons=[{val:'确定'}];  
+        }
+        if (typeof cfg.buttons == "number"||typeof cfg.buttons == "string") {
+            cfg.buttons=[{val:cfg.buttons}]; 
+        };
         if(cfg.icon)this.dvCT.innerHTML='<div class="icon '+cfg.icon+'"></div>';  
         if(cfg.msg)this.dvCT.innerHTML+=cfg.msg+'<div class="clear"></div>';  
-        this.dvBottom.style.height='45px';  
-        this.dvBtns.innerHTML='<div class="height"></div>';  
-        if(cfg.buttons.yes){  
-          this.dvBtns.appendChild(this.createBtn('yes',cfg.buttons.yes,cfg.fn));  
-          if(cfg.buttons.no)this.dvBtns.appendChild(document.createTextNode(' '));
+        this.dvBottom.style.height='55px'; 
+
+        var btndivwidth = (100/cfg.buttons.length).toFixed(3).substring(0,5);
+
+        for(var i=0;i<cfg.buttons.length;i++){
+            if (cfg.buttons[i].type == false) {
+                cfg.buttons[i].class = 'showboxbtnNo';
+            }else{
+                cfg.buttons[i].class = 'showboxbtnYes';
+            }
+            var div=this.createDiv(btndivwidth);
+            div.appendChild(this.createBtn(cfg,cfg.buttons[i].args,cfg.buttons[i].val,cfg.buttons[i].class,cfg.buttons[i].fn));
+            this.dvBtns.appendChild(div); 
+        }
+      }
+      else if (cfg.alert) {
+        if (!cfg.buttons||!cfg.buttons.yes) {
+            cfg.buttons={yes:'确定'};
+        }
+        if(cfg.msg)this.dvCT.innerHTML+=cfg.msg+'<div class="clear"></div>';  
+        this.dvBottom.style.height='55px';
+        var div=this.createDiv(100);
+        div.appendChild(this.createBtn(cfg,'yes',cfg.buttons.yes,'showboxbtnYes',cfg.fn));  
+        this.dvBtns.appendChild(div);    
+      }
+      else{  
+        if(!cfg.buttons||(!cfg.buttons.yes&&!cfg.buttons.no)){  
+          cfg.buttons={yes:'确定',no:'取消'};  
         }  
-        if(cfg.buttons.no)this.dvBtns.appendChild(this.createBtn('no',cfg.buttons.no)); 
+        if (!cfg.buttons.yes) {
+            cfg.buttons.yes = '确定';
+        }
+        if (!cfg.buttons.no) {
+            cfg.buttons.no = '取消';
+        }
+        if(cfg.icon)this.dvCT.innerHTML='<div class="icon '+cfg.icon+'"></div>';  
+        if(cfg.msg)this.dvCT.innerHTML+=cfg.msg+'<div class="clear"></div>';  
+        this.dvBottom.style.height='55px';  
+        //this.dvBottom.style.m='45px'
+        //this.dvBtns.innerHTML='<div class="height"></div>';  
+        var div=this.createDiv(50);
+        div.appendChild(this.createBtn(cfg,'no',cfg.buttons.no,'showboxbtnNo'));
+        this.dvBtns.appendChild(div);   
+        var div=this.createDiv(50);
+        div.appendChild(this.createBtn(cfg,'yes',cfg.buttons.yes,'showboxbtnYes',cfg.fn));  
+        this.dvBtns.appendChild(div);
       }  
       Showbox.initBodyScale();  
       this.dvMsgBox.style.display='block';  
@@ -150,6 +221,7 @@ Showbox.Msg={
     hide:function(){  
       this.dvMsgBox.style.display='none';  
       this.lightBox.style.display='none';  
+      this.dvBtns.innerHTML = '';
       if(this.timer){clearInterval(this.timer);this.timer=null;}  
       if(Showbox.IsIE)window.detachEvent('onresize',this.onResize);  
       else window.removeEventListener('resize',this.onResize,false);  
@@ -158,8 +230,8 @@ Showbox.Msg={
        if(isResize)Showbox.initBodyScale();  
        Showbox.Msg.lightBox.style.width=Showbox.BodyScale.tx+'px';  
        Showbox.Msg.lightBox.style.height=Showbox.BodyScale.ty+'px';  
-       Showbox.Msg.dvMsgBox.style.top=35+'%';  
+       Showbox.Msg.dvMsgBox.style.top=32+'%';  
        Showbox.Msg.dvMsgBox.style.left=Math.floor((Showbox.BodyScale.x-Showbox.Msg.dvMsgBox.offsetWidth)/2)+'px';  
        Showbox.Msg.dvMsgBox.style.position='fixed';  
     }  
-}  
+}
